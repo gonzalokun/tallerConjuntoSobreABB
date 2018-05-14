@@ -6,8 +6,13 @@
  * Test simple básico
  */
 TEST(conjunto_test, conjunto_vacio) {
+    //std::cout << "EMPEZO EL TEST" << std::endl;
     Conjunto<int> c;
+
+    //std::cout << "El Cardinal es " << c.cardinal() << std::endl;
+
     EXPECT_EQ(c.cardinal(), 0);
+    //std::cout << "TERMINO EL TEST" << std::endl;
 }
 
 
@@ -139,11 +144,21 @@ TEST(conjunto_test, test_stress) {
     // Eliminar los valores para i par
     for (int i = 0; i < NCLAVES; i++) {
 	    int k = clave(i);
-	    ASSERT_TRUE(c.pertenece(k));
+
+        //std::cout << "ELEMENTO k = " << k << std::endl;
+
+        ASSERT_TRUE(c.pertenece(k));
 	    if (i % 2 == 0) {
+            //std::cout << "VOY A ELIMINAR A k = " << k << std::endl;
+            //std::cout << "CARDINAL ANTES: " << c.cardinal() << std::endl;
 	    	c.remover(k);
 	    	ASSERT_FALSE(c.pertenece(k));
+
+            //std::cout << "CARDINAL DESPUES: " << c.cardinal() << std::endl;
+
+            //std::cout << "--------------------" << std::endl;
 	    }
+
     }
     ASSERT_EQ(c.cardinal(), NCLAVES / 2);
 

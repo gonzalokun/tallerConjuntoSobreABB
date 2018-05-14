@@ -67,7 +67,7 @@ class Conjunto
         // Puntero a la raíz de nuestro árbol.
         Nodo* _raiz;
 
-        int _cantidadElementos;
+        unsigned int _cantidadElementos;
 
         Nodo* buscar(const T& elem) const;
 

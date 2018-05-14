@@ -10,11 +10,28 @@ Conjunto<T>::Conjunto() : _cantidadElementos(0), _raiz(nullptr) {
 // Borra todos los nodos de la memoria
 template <class T>
 Conjunto<T>::~Conjunto() {
+
+    //Si no tengo elementos me voy
+    //BUSCAR MEJOR SOLUCION
+    if(cardinal() == 0){
+        return;
+    }
+
+    /*
     // Creo una lista de punteros a los elementos
     std::vector<Nodo*> nodosEnLista;
 
+    //Si no tengo elementos no hago nada
+    std::cout << "Empezo el borrado" << std::endl;
+
     // Agarro el menor elemento
-    T valorActual = minimo();
+    T valorActualAux = minimo();
+
+    std::cout << "MINIMO (antes de pasar a variable por copia): " << valorActualAux << std::endl;
+
+    T valorActual = valorActualAux;
+
+    std::cout << "MINIMO (despues de pasar valor por copia): " << valorActual << std::endl;
 
     // Agrego los punteros de los nodos que contienen los elementos a la lista
     while(valorActual != maximo()){
@@ -23,6 +40,8 @@ Conjunto<T>::~Conjunto() {
 
         valorActual = siguiente(valorActual);
     }
+
+    assert(valorActual == maximo());
 
     // Agrego el maximo (que no se deberia haber agregado antes)
     nodosEnLista.push_back(buscar(valorActual));
@@ -36,8 +55,36 @@ Conjunto<T>::~Conjunto() {
 
         delete nodosEnLista[i];
     }
+    */
 
     // Se deberian haber borrado todos los elementos
+
+    //BORRO DE VERDAD
+
+    T minElem = minimo();
+
+    //std::cout << "MINIMO DESDE FUNCION: " << minElem << std::endl;
+
+    T elemActual = minElem; //Asi sacamos el const
+
+    //std::cout << "MINIMO DESDE VARIABLE NO CONST: " << elemActual << std::endl;
+
+    T maxElem = maximo();
+
+    //std::cout << "MAXIMO DESDE FUNCION: " << maxElem << std::endl;
+
+    while(elemActual != maxElem){
+        T siguienteElem = siguiente(elemActual);
+
+        remover(elemActual);
+
+        elemActual = siguienteElem;
+    }
+
+    //Ahora saco el maximo
+    remover(elemActual);
+
+    //Deberia estar borrado todo
 }
 
 // Busca un elemento y te devuelve el puntero al nodo que lo contiene
@@ -64,11 +111,11 @@ typename Conjunto<T>::Nodo* Conjunto<T>::buscar(const T& elem) const {
 
             //Si la clave es mas chica, hay que recorrer la izquierda, sino recorro por la derecha
             if(nodoActual->valor > elem){
-                nodoActual->izq;
+                nodoActual = nodoActual->izq;
             }
 
             else{
-                nodoActual->der;
+                nodoActual = nodoActual->der;
             }
         }
 
@@ -87,6 +134,8 @@ bool Conjunto<T>::pertenece(const T& clave) const {
     // Buscamos por todo el arbol empezando desde la raiz
     while(nodoActual != nullptr){
 
+        //std::cout << "EN EL WHIIIIIILE" << std::endl;
+        //std::cout << (nodoActual->valor == clave) << std::endl;
         // Si el valor actual es el ingresado, entonces pertenece y nos vamos del ciclo
         if(nodoActual->valor == clave){
             perteneceAlConjunto = true;
@@ -94,17 +143,21 @@ bool Conjunto<T>::pertenece(const T& clave) const {
             // Pongo el valor del nodo en nulo asi salgo del ciclo
             nodoActual = nullptr;
         }
+        else {
 
-        else{
+            //std::cout << "EN EL ELSE DEL WHILE" << std::endl;
+
             //No es el valor, tengo que ver por cual rama avanzo
 
             //Si la clave es mas chica, hay que recorrer la izquierda, sino recorro por la derecha
             if(nodoActual->valor > clave){
-                nodoActual->izq;
+                //std::cout << "VALE nodoActual->valor > clave" << std::endl;
+                nodoActual = nodoActual->izq;
             }
 
             else{
-                nodoActual->der;
+                //std::cout << "VALE nodoActual->valor < clave" << std::endl;
+                nodoActual = nodoActual->der;
             }
         }
 
@@ -114,9 +167,13 @@ bool Conjunto<T>::pertenece(const T& clave) const {
 }
 
 // Inserta nuevos elementos
-// SUPONGO QUE: no me van a dar uno repetido, o sea es un conjunto (PREGUNTAR POR LAS DUDAS)
 template <class T>
 void Conjunto<T>::insertar(const T& clave) {
+
+    // Si ya pertenece no hago nada
+    if (pertenece(clave)){
+        return;
+    }
 
     // Creamos el nodo en memoria
     Nodo* nuevoNodo = new Nodo(clave);
@@ -176,6 +233,11 @@ void Conjunto<T>::insertar(const T& clave) {
 // Remueve el nodo con el elemento ingresado
 template <class T>
 void Conjunto<T>::remover(const T& elem) {
+
+    if(!pertenece(elem)){
+        return;
+    }
+
     // Obtengo el nodo a borrar
     Nodo* nodoABorrar = buscar(elem);
 
@@ -183,14 +245,22 @@ void Conjunto<T>::remover(const T& elem) {
     if(esHola(elem)){
         // Tengo que saber si vino de una rama izquierda o derecha
 
-        if(nodoABorrar->padre->izq == nodoABorrar){
-            // Vino de rama izquierda
-            nodoABorrar->padre->izq = nullptr;
+        if(nodoABorrar == _raiz){
+            //Si es la raiz no provino de ningun lugar
+            _raiz = nullptr;
         }
 
-        else{
-            // Vino de rama derecha
-            nodoABorrar->padre->der = nullptr;
+        else {
+
+            if (nodoABorrar->padre->izq == nodoABorrar) {
+                // Vino de rama izquierda
+                nodoABorrar->padre->izq = nullptr;
+            }
+
+            else {
+                // Vino de rama derecha
+                nodoABorrar->padre->der = nullptr;
+            }
         }
 
         // Borro el nodo
@@ -206,18 +276,24 @@ void Conjunto<T>::remover(const T& elem) {
             Nodo* nodoHijo = (nodoABorrar->izq != nullptr) ? nodoABorrar->izq : nodoABorrar->der;
             Nodo* nodoPadre = nodoABorrar->padre;
 
-            if(nodoPadre->izq == nodoABorrar){
-                // Vino de rama izquierda
-
-                nodoPadre->izq = nodoHijo;
-                nodoHijo->padre = nodoPadre;
+            if(nodoABorrar == _raiz) {
+                //Si es la raiz, el hijo pasa a ser la nueva raiz
+                nodoHijo->padre = nullptr;
+                _raiz = nodoHijo;
             }
 
-            else{
-                // Vino de rama derecha
+            else {
+                if (nodoPadre->izq == nodoABorrar) {
+                    // Vino de rama izquierda
+                    nodoPadre->izq = nodoHijo;
+                    nodoHijo->padre = nodoPadre;
+                }
 
-                nodoPadre->der = nodoHijo;
-                nodoHijo->padre = nodoPadre;
+                else {
+                    // Vino de rama derecha
+                    nodoPadre->der = nodoHijo;
+                    nodoHijo->padre = nodoPadre;
+                }
             }
 
             delete nodoABorrar;
@@ -225,6 +301,45 @@ void Conjunto<T>::remover(const T& elem) {
 
         else{
             //Tiene dos ramas
+            if(nodoABorrar == _raiz){
+                // Quiero borrar la raiz
+                T elemSiguiente = siguiente(nodoABorrar->valor);
+
+                T copiaDeSiguiente = elemSiguiente;
+
+                remover(copiaDeSiguiente);
+
+                _cantidadElementos++;
+
+                _raiz->valor = copiaDeSiguiente;
+            }
+            else{
+                // No estoy borrando la raiz
+
+                // Le busco el siguiente al nodo que quiero borrar
+                T elemSiguiente = siguiente(nodoABorrar->valor);
+
+                //NO HAGO ESTO
+                // Tomo un puntero al nodo siguiente al que borro (se me va a ir la complejidad al diablo pero bue)
+                //Nodo* nodoSiguiente = buscar(elemSiguiente);
+
+                //ESTO PUEDE NO FUNCIONAR :( (PERO SI FUNCIONA VALE)
+                //T valorSiguiente = nodoSiguiente->valor;
+                T valorSiguiente = elemSiguiente;
+
+                //Saco al siguiente
+                remover(elemSiguiente);
+
+                //Tengo que sumarle uno a cantidad de elementos porque lo de arriba se lo saca
+                _cantidadElementos++;
+
+                //A partir de aca el siguiente no apunta a nada
+
+                // Reemplazo el nodo a borrar con el otro
+                nodoABorrar->valor = valorSiguiente;
+
+                //Ya estaria (please)
+            }
         }
     }
 
@@ -236,8 +351,7 @@ void Conjunto<T>::remover(const T& elem) {
 template <class T>
 const T& Conjunto<T>::siguiente(const T& clave) {
     // Obtengo el nodo que tiene el elemento al cual le quiero encontrar el siguiente
-
-    T valorDeseado;
+    Nodo* nodoDeseado = nullptr;
 
     Nodo* nodoActual = buscar(clave);
 
@@ -253,7 +367,7 @@ const T& Conjunto<T>::siguiente(const T& clave) {
         }
 
         // minimoNodo ahora apunta al menor
-        valorDeseado = minimoNodo->valor;
+        nodoDeseado = minimoNodo;
     }
 
     else{
@@ -267,10 +381,10 @@ const T& Conjunto<T>::siguiente(const T& clave) {
         }
 
         // Si sali entonces es porque vine de una rama izquierda, entonces siguiente apunta al valor que quiero
-        valorDeseado = siguiente->valor;
+        nodoDeseado = siguiente;
     }
 
-    return valorDeseado;
+    return nodoDeseado->valor;
 }
 
 // Dice si un elemento es hoja o no
